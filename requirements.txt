@@ -1,2 +1,2 @@
 random
-wfdb==2.2.1
+wfdb==4.2.1
