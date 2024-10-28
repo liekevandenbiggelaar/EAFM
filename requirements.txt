@@ -1,2 +1,6 @@
 random
 wfdb==4.2.1
+pyspark
+plotly
+matplotlib
+neurokit2==0.2.10
