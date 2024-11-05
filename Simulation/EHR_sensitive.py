@@ -22,47 +22,40 @@ def generate_EHR(dataset = 'CPSC'):
 
     # age is skewed towards the age that most AF occurs (from 50)
     age = [random.randint(50, 80) for i in range(size)]
-    dct_EHR['Age'] = age
+    dct_EHR['a1'] = age
 
     # gender is little skewed towards males
     gender = random.choices(['Male', 'Female'], [70, 30], k=size)
-    dct_EHR['Gender'] = gender
+    dct_EHR['a2'] = gender
 
     # skewed towards normal weight
     BMI = random.choices(['UW', 'HW', 'OW', 'OB', 'EB', 'MB'], [10, 35, 30, 8, 5, 2], k=size)
-    dct_EHR['BMI'] = BMI
+    dct_EHR['a3'] = BMI
 
 
     # Generate health scores
     #EuroI = 
     #EuroII =
-    ASA = random.choices([1, 2, 3, 4, 5, 6], k=size)
-    dct_EHR['ASA'] = ASA
+    ASA = random.choices(['1', '2', '3', '4', '5', '6'], k=size)
+    dct_EHR['a4'] = ASA
 
     # Habits
-    habits = ['Drugs', 'Smoke', 'Alcohol']
+    habits = ['a5', 'a6', 'a7']
     for hab in habits:
         use = random.choices(['0. None', '1. Used', '2. Uses'], k=size)
         dct_EHR[hab] = use
 
     # Fluid losses
-    fluids = ['Blood', 'Defecation', ' Dialysis', ' Drains', 'Stomach', 'Urine', 'Moisture']
+    fluids = ['a8', 'a9', ' a10', ' a11', 'a12', 'a13', 'a14']
     for fl in fluids:
         loss = random.choices([0, random.randint(0, 2500)], [60, 40], k=size) #assume less loss is more common
         dct_EHR[fl] = loss
 
-    lst_homemeds = ['ACETYLSALICYLZUUR', 'ALLOPURINOL', 'AMIODARON',
-               'AMLODIPINE', 'APIXABAN', 'ATORVASTATINE', 'BETAHISTINE', 'BISOPROLOL',
-               'BUDESONIDE', 'BUMETANIDE', 'COLECALCIFEROL', 'DARBEPOETINE ALFA',
-               'DESLORATADINE', 'DIGOXINE', 'EMPAGLIFLOZINE', 'EPLERENON',
-               'FAMOTIDINE', 'FUROSEMIDE', 'ISOSORBIDEDINITRAAT', 'KETOCONAZOL',
-               'KUNSTTRANEN EN ANDERE INDIFFERENTE PREPARATEN', 'LANREOTIDE',
-               'LEVOTHYROXINE', 'LISINOPRIL', 'LORAZEPAM', 'LOSARTAN MET DIURETICA',
-               'MACROGOL, COMBINATIEPREPARATEN', 'METOCLOPRAMIDE', 'METOPROLOL',
-               'NITROGLYCERINE', 'NORTRIPTYLINE', 'OLOPATADINE', 'OXYCODON',
-               'PANTOPRAZOL', 'PERINDOPRIL', 'RIVAROXABAN', 'ROSUVASTATINE',
-               'SILDENAFIL', 'SITAGLIPTINE', 'TEMAZEPAM', 'TRIAMCINOLON',
-               'VENLAFAXINE', 'ZOPICLON']
+    lst_homemeds = ['a15', 'a16', 'a17', 'a18', 'a19', 'a20', 'a21', 'a22',
+               'a23', 'a24', 'a25', 'a26', 'a27', 'a28', 'a29', 'a30',
+               'a31', 'a32', 'a33', 'a34', 'a35', 'a36', 'a37', 'a38', 'a39', 'a40',
+               'a41', 'a42', 'a43', 'a44', 'a45', 'a46', 'a47',
+               'a48', 'a49', 'a50', 'a51', 'a52', 'a53', 'a54', 'a55', 'a56', 'a57']
     
     for homemed in lst_homemeds:
         binsmed = random.choices(['Not Taken', 'Taken'], [80, 20], k=size) #assume more do not take a medicine than the ones that do
