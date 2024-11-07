@@ -15,8 +15,6 @@ def load_record(dataset: str, record: str):
         return "Fault: Unknown dataset."
     
     sample_path = os.path.join(filepath, record)
-    pid = re.search(r'data_(\d+)_', record).group(1)
-    wid = re.search(r'_(\d+)$', record).group(1)
 
     found, ecg, info = load_ecg_info(sample_path)
         #print(sample_path)

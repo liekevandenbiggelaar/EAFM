@@ -5,13 +5,13 @@ import numpy as np
 import scipy
 import ast
 
-from Preprocessing.cleaning import denoise, weighted_moving_average, ecg_invert
-from Analysis.visualizations import create_avg_plot
+from Code.Preprocessing.cleaning import weighted_moving_average, ecg_invert
+from Code.Analysis.visualizations import create_avg_plot
 
 
 # ========= R-PEAK DETECTION: DONE =========== #
 
-def R_peak_detection(ecg: list):
+def R_peak_detection(ecg: list, rate: int):
     """ 
     Locate R-peaks in a signal. 
 
@@ -22,22 +22,23 @@ def R_peak_detection(ecg: list):
     * R: list(int) - A list with the index that represents the place of the R-peaks.
     """
 
-    _, results = nk.ecg_peaks(ecg, sampling_rate=500)
+    _, results = nk.ecg_peaks(ecg, sampling_rate=rate)
     R = results['ECG_R_Peaks']
         
     return R 
 
 
-def R_peak_interval(R):
+def R_peak_interval(R, rate: int):
     RR = []
     R_correct = []
-    
+    maxdiff = round(rate / 2, 0)
+
     while len(R) != 0:
         if len(R) != 1:
             R0, R1 = R[0: 2]
             diff = R1 - R0
             
-            if diff < 200 and len(R) != 2: # Correction for faulty R peaks
+            if diff < maxdiff and len(R) != 2: # Correction for faulty R peaks
                 R2 = R[2]
                 nextdiff = R2 - R1
                 if len(RR) != 0:
@@ -71,9 +72,9 @@ def RR_interval_difference(RR):
 
 
 # ========= QRS-COMPLEX DETECTION: DONE =========== #
-def QRS_delineate(ecg, R):
+def QRS_delineate(ecg, R, rate=500):
     
-    waves, _ = nk.ecg_delineate(ecg, rpeaks=R, sampling_rate=500)
+    waves, _ = nk.ecg_delineate(ecg, rpeaks=R, sampling_rate=rate)
     
     return waves
 
@@ -153,18 +154,21 @@ def wave_detection(ecg: list, S: list, Q: list, wid: str, first_wid: int, avg_PQ
                 Q.pop(0)
             else:
                 segment = ecg[S_i: Q_i]
+
                 segment = weighted_moving_average(segment, sigma=20, M=10)
-                segment = weighted_moving_average(segment, sigma=25, M=50)
+                #segment = weighted_moving_average(segment, sigma=25, M=50)
                 segment = np.array(scale_segment(segment))
+                
 
                 peaks, _ = scipy.signal.find_peaks(segment)
-                peaks = [p for p in peaks if segment[p] > 0.5]
+                
+                peaks = [p for p in peaks if segment[p] > 0.1]
                 
                 # Count Waves
                 nr_peaks = len(peaks)
                 
                 # P-Wave Existence Preparation
-                peaks = [ x + S_i + 13 for x in peaks ]
+                peaks = [ x + S_i + 3 for x in peaks ]
                 SQ_i = Q_i - S_i
                 SQ.append(SQ_i)
                 
@@ -255,55 +259,49 @@ def SQ_interval_difference(SQ):
 
 ##################### DELINEATE ALL ############################
                                   
-def extract_features(ecg: list, pid: str, wid: str, avg_PQ, avg_count, short=False, plot=False):
+def extract_features(ecg: list, pid: str, wid: str, avg_PQ, avg_count, rate=500):
     
     features = {}
     
     features['PID'] = [pid]
     features['WID'] = [wid]
     
-    if short:
-        ecg = ecg[:500*10*60]
-        ecg_old = ecg
-    
+    #plt.scatter(R, ecg[R], color='orange')
     ecg, inverted = ecg_invert(ecg)
-    ecg = hp.filter_signal(ecg, cutoff = 0.75, sample_rate = 500, filtertype='highpass')
+    ecg = hp.filter_signal(ecg, cutoff = 0.75, sample_rate = rate, filtertype='highpass')
     ecg = weighted_moving_average(ecg, sigma=20, M=10)
-    print("= Done preprocessing. ")
+    
     
     # R-peak 
     try:
-        R = R_peak_detection(ecg)
+        R = R_peak_detection(ecg, rate)
+        
     except:
         return features, avg_PQ, avg_count
 
     if len(R) <= 1:
         return features, avg_PQ, avg_count
     
-    RR, R = R_peak_interval(list(R)) 
+    RR, R = R_peak_interval(list(R), rate) 
     deltaRR = RR_interval_difference(RR)
     # avg = create_avg_plot(ecg, R)
     
     features['R-location'] = [R]
     features['RR-interval'] = [RR]
     features['RR-difference'] = [deltaRR]
-    print('= R peak metadata!')
     
 
     # QRS-complex
     try:
-        waves = QRS_delineate(ecg, R)
+        waves = QRS_delineate(ecg, R, rate)
         Q, S = Q_S_peak_detection(waves)
-        print('== Found QS!')
         
     except:
-        print('== Foutje in detectie, oeps')
         Q, S, = [], []
     
     features['Q-location'] = [Q]
     features['S-location'] = [S]
     
-    print('= Q- and S-peak found!')
     
     # Wave Detection
     if len(RR) == 0:
@@ -313,15 +311,20 @@ def extract_features(ecg: list, pid: str, wid: str, avg_PQ, avg_count, short=Fal
         
     if len(Q) != 0 and len(S) != 0:
         QRS = QRS_duration(Q.copy(), S.copy(), avg_RR)
-        print('== QRS done')
         
-        waves_count, extra_waves, wave_indices, Q_peaks_correct, SQ, avg_PQ, avg_count = wave_detection(ecg, S.copy(), Q.copy(), wid, avg_PQ, avg_count)
+        waves_count, extra_waves, wave_indices, Q_peaks_correct, SQ, avg_PQ, avg_count = wave_detection(ecg, S.copy(), Q.copy(), wid, '1', avg_PQ, avg_count)
         P_binary, F_binary = P_existence(wave_indices, Q_peaks_correct, avg_PQ)
         delta_SQ = SQ_interval_difference(SQ)
-        
-        print('== waves done')
     else:
         QRS, wave_indices, waves_count = [], [], []
+    
+    # plt.figure(figsize=(15,10))
+    # plt.plot(range(len(ecg)), ecg)
+    # plt.scatter(R, ecg[R], color='orange')
+    # plt.scatter(Q, ecg[Q], color='red')
+    # plt.scatter(S, ecg[S], color='green')
+    # plt.scatter(wave_indices, ecg[wave_indices], color='grey')
+    # plt.show()
     
     features['QRS-duration'] = [QRS]
     features['SQ-duration'] = [SQ]
@@ -332,13 +335,11 @@ def extract_features(ecg: list, pid: str, wid: str, avg_PQ, avg_count, short=Fal
     features['P-existence'] = [P_binary]
     features['F-existence'] = [F_binary]
     
-    print('= Waves identified')
-    
     return features, avg_PQ, avg_count
 
 
                          
-def extract_features_after_RR(df, ecg: list, pid: str, wid: str, avg_PQ, avg_count, short=False, plot=False):
+def extract_features_after_RR(df, ecg: list, pid: str, wid: str, avg_PQ, avg_count, rate=500):
     
     extra_features = {}
     
@@ -353,12 +354,8 @@ def extract_features_after_RR(df, ecg: list, pid: str, wid: str, avg_PQ, avg_cou
     if len(df_valid) == 0:
         return extra_features, avg_PQ, avg_count
     
-    if short:
-        ecg = ecg[:500*10*60]
-        ecg_old = ecg
-    
     ecg, inverted = ecg_invert(ecg)
-    ecg = hp.filter_signal(ecg, cutoff = 0.75, sample_rate = 500, filtertype='highpass')
+    ecg = hp.filter_signal(ecg, cutoff = 0.75, sample_rate = rate, filtertype='highpass')
     ecg = weighted_moving_average(ecg, sigma=20, M=10)
     print("= Done preprocessing. ")
     
@@ -368,7 +365,7 @@ def extract_features_after_RR(df, ecg: list, pid: str, wid: str, avg_PQ, avg_cou
     print('= R-peak information extracted.')
     # QRS-complex
     try:
-        waves = QRS_delineate(ecg, R)
+        waves = QRS_delineate(ecg, R, rate)
         Q, S = Q_S_peak_detection(waves)
         print('== Found QS!')
         
