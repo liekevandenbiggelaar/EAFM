@@ -37,12 +37,8 @@ def generate_features(dataset='CPSC'):
         pid = re.search(r'data_(\d+)_', record).group(1)
         wid = re.search(r'_(\d+)$', record).group(1)
 
-        if pid == '51':
-            return feats
-        elif int(pid) < 41:
-            continue
-        elif pid in ['8', '11', '25', '33', '38', '40', '43', '44', '50']:
-            print(f"Patient nr {pid} is skipped")
+        kernelerror = ['8', '11', '25', '38', '40', '51', '57', '71']
+        if pid in kernelerror:
             continue
         
         print(f"Start on pid={pid} and wid={wid}")

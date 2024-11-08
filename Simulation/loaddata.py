@@ -34,6 +34,22 @@ def load_ecg_info(path: str):
     except:
         return False, [], []
 
-    
 
+def aggregate_dataset(df):
+    """ Aggregate the dataset based on the PID. """
+
+    df_noWID = df.drop(['WID'], axis=1)
+    colnames = list(df_noWID.columns)
+    colnames.remove('PID')
+    agg_functions = {'PID': 'first'}
+
+    for col in colnames:
+        if col == 'AF':
+            agg_functions['AF'] = list
+        else:
+            agg_functions[col] = 'sum'
+    
+    df_agg = df_noWID.groupby('PID').agg(agg_functions)
+
+    return df_agg
 
