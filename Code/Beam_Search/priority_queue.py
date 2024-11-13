@@ -1,4 +1,4 @@
-import constraints as cs
+import Code.Beam_Search.constraints as cs
 
 class PriorityQueue:
     

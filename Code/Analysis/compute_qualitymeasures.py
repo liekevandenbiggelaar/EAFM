@@ -1,11 +1,11 @@
 import pandas as pd
 import ast
 
-import Beam_Search.qualitymeasure as qm
+import Code.Beam_Search.qualitymeasure as qm
 
-def compute_qualitymeasures():
+def compute_qualitymeasures(path: str, savepath: str):
     
-    metadata = pd.read_csv('/bd-fs-mnt/acacia-working-area/dwc/lieke/MetadataTable_all.csv')
+    metadata = pd.read_csv(path)
     
     sdsd_all, rmssd_all, sdrr_all = [], [], []
     pcount_all, fcount_all, wavescount_all = [], [], []
@@ -72,7 +72,7 @@ def compute_qualitymeasures():
     
     quality_table = quality_table.groupby(['PID'], as_index=False).mean().round(2)
     
-    save_path = '/bd-fs-mnt/acacia-working-area/dwc/lieke/'
+    save_path = savepath
     quality_table.to_csv(save_path + "QualityMeasures.csv", index=False)
     
     return quality_table

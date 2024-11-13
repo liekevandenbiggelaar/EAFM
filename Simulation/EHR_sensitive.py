@@ -3,7 +3,7 @@
 import random
 import pandas as pd
 
-def generate_EHR(dataset = 'CPSC'):
+def generate_EHR(dataset = 'CPSC', vals = 105, other=False):
     """
     Generating fictional Electronic Health Records for patients. The values are created biased towards the real world as informed by domain experts.
     This includes binary, numerical, and nominal features: 
@@ -14,9 +14,11 @@ def generate_EHR(dataset = 'CPSC'):
 
     """
     random.seed(2)
-
     dct_samplesizes = {'MITBIH': 25, 'CPSC': 105, 'SHDB-AF': 100}
-    size = dct_samplesizes[dataset]
+    if other:
+        size = vals
+    else:
+        size = dct_samplesizes[dataset]
 
     dct_EHR = {}
 
@@ -46,9 +48,9 @@ def generate_EHR(dataset = 'CPSC'):
         dct_EHR[hab] = use
 
     # Fluid losses
-    fluids = ['a8', 'a9', ' a10', ' a11', 'a12', 'a13', 'a14']
+    fluids = ['a8', 'a9', 'a10', 'a11', 'a12', 'a13', 'a14']
     for fl in fluids:
-        loss = random.choices([0, random.randint(0, 2500)], [60, 40], k=size) #assume less loss is more common
+        loss = [random.choices([0, random.randint(100, 2500)], [60, 40], k=1)[0] for i in range(size)] #assume less loss is more common
         dct_EHR[fl] = loss
 
     lst_homemeds = ['a15', 'a16', 'a17', 'a18', 'a19', 'a20', 'a21', 'a22',

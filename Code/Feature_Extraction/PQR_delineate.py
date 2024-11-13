@@ -286,9 +286,9 @@ def extract_features(ecg: list, pid: str, wid: str, avg_PQ, avg_count, rate=500)
     deltaRR = RR_interval_difference(RR)
     # avg = create_avg_plot(ecg, R)
     
-    features['R-location'] = [R]
-    features['RR-interval'] = [RR]
-    features['RR-difference'] = [deltaRR]
+    features['R-location'] = [int(i) for i in R]
+    features['RR-interval'] = [int(j) for j in RR]
+    features['RR-difference'] = [int(m) for m in deltaRR]
     
 
     # QRS-complex
@@ -328,7 +328,7 @@ def extract_features(ecg: list, pid: str, wid: str, avg_PQ, avg_count, rate=500)
     
     features['QRS-duration'] = [QRS]
     features['SQ-duration'] = [SQ]
-    features['SQ-difference'] = [delta_SQ]
+    features['SQ-difference'] = [int(c) for c in delta_SQ]
     
     features['Wave Count'] = [waves_count]
     features['Extra Waves'] = [extra_waves]
@@ -336,77 +336,3 @@ def extract_features(ecg: list, pid: str, wid: str, avg_PQ, avg_count, rate=500)
     features['F-existence'] = [F_binary]
     
     return features, avg_PQ, avg_count
-
-
-                         
-def extract_features_after_RR(df, ecg: list, pid: str, wid: str, avg_PQ, avg_count, rate=500):
-    
-    extra_features = {}
-    
-    extra_features['PID'] = [pid]
-    extra_features['WID'] = [wid]
-    
-    df_valid = df[ (df['PID'] == pid) ]
-    first_wid = df_valid.iloc[0]['WID']
-    df_valid = df_valid[(df_valid['WID'] == int(wid)) ]
-    
-    
-    if len(df_valid) == 0:
-        return extra_features, avg_PQ, avg_count
-    
-    ecg, inverted = ecg_invert(ecg)
-    ecg = hp.filter_signal(ecg, cutoff = 0.75, sample_rate = rate, filtertype='highpass')
-    ecg = weighted_moving_average(ecg, sigma=20, M=10)
-    print("= Done preprocessing. ")
-    
-    # R-peak 
-    RR = ast.literal_eval( df_valid.iloc[0]['RR-interval'] ) 
-    R  = ast.literal_eval( df_valid.iloc[0]['R-location'] )
-    print('= R-peak information extracted.')
-    # QRS-complex
-    try:
-        waves = QRS_delineate(ecg, R, rate)
-        Q, S = Q_S_peak_detection(waves)
-        print('== Found QS!')
-        
-    except:
-        print('== Foutje in detectie, oeps')
-        Q, S, = [], []
-    
-    extra_features['Q-location'] = [Q]
-    extra_features['S-location'] = [S]
-    
-    print('= Q- and S-peak found!')
-    
-    # Wave Detection
-    if len(RR) == 0:
-        avg_RR = 0
-    else:
-        avg_RR = np.mean(np.array(RR))
-        
-    if len(Q) != 0 and len(S) != 0:
-        QRS = QRS_duration(Q.copy(), S.copy(), avg_RR)
-        print('== QRS done')
-        waves_count, extra_waves, wave_indices, Q_peaks_correct, SQ, avg_PQ, avg_count = wave_detection(ecg, S.copy(), Q.copy(), wid, first_wid, avg_PQ, avg_count)
-        print('== Got waves')
-        P_binary, F_binary = P_existence(wave_indices, Q_peaks_correct, avg_PQ)
-        delta_SQ = SQ_interval_difference(SQ)
-        
-        print('== waves done')
-    else:
-        QRS, waves_indices, SQ, delta_SQ, waves_count = [], [], [], [], []
-    
-    extra_features['QRS-duration'] = [QRS]
-    extra_features['SQ-duration'] = [SQ]
-    extra_features['SQ-difference'] = [delta_SQ]
-    
-    extra_features['Wave Count'] = [waves_count]
-    extra_features['Extra Waves'] = [extra_waves]
-    extra_features['P-existence'] = [P_binary]
-    extra_features['F-existence'] = [F_binary]
-    
-    print('= Waves identified')
-    
-    
-    return extra_features, avg_PQ, avg_count
-

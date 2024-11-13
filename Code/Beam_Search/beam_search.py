@@ -1,11 +1,11 @@
 import math
 
-import refinements as rf
-import select_subgroup as ss
-import constraints as cs
-import preprocess as pp
-import qualitymeasure as qm
-from priority_queue import PriorityQueue
+import Code.Beam_Search.refinements as rf
+import Code.Beam_Search.select_subgroup as ss
+import Code.Beam_Search.constraints as cs
+import Code.Beam_Search.preprocess as pp
+import Code.Beam_Search.qualitymeasure as qm
+from Code.Beam_Search.priority_queue import PriorityQueue
 
 
 def beam_search(epd, target, theta: str, q: int, w: int, d: int, b: int, c: int):
@@ -39,12 +39,12 @@ def beam_search(epd, target, theta: str, q: int, w: int, d: int, b: int, c: int)
     avg_theta_0 = qm.compute_theta(target_data=target, theta=theta, subgroup=epd)
     
     # Initialize the result set
-    result_set = PriorityQueue(q)
+    result_set = PriorityQueue(q, queue=[])
     
     # Loop over all levels of the beam search
     for lvl in range(1, d+1):
         
-        beam = PriorityQueue(w) #store the best w of this level, start from scratch each level
+        beam = PriorityQueue(w, queue=[]) #store the best w of this level, start from scratch each level
         cq_satisfied = []
         
         # Loop over all descriptions in the candidate queue
