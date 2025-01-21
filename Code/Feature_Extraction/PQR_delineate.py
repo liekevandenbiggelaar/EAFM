@@ -6,7 +6,6 @@ import scipy
 import ast
 
 from Code.Preprocessing.cleaning import weighted_moving_average, ecg_invert
-from Code.Analysis.visualizations import create_avg_plot
 
 
 # ========= R-PEAK DETECTION: DONE =========== #

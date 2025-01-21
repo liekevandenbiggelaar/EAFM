@@ -8,7 +8,7 @@ import Code.Beam_Search.qualitymeasure as qm
 from Code.Beam_Search.priority_queue import PriorityQueue
 
 
-def beam_search(epd, target, theta: str, q: int, w: int, d: int, b: int, c: int):
+def beam_search(epd, target, evaluation, theta: str, q: int, w: int, d: int, b: int, c: int):
     """
     Input
     =====
@@ -73,7 +73,7 @@ def beam_search(epd, target, theta: str, q: int, w: int, d: int, b: int, c: int)
                     #print(descr, cq_satisfied)
                     
                     avg_theta_G = qm.compute_theta(target_data=target, theta=theta, subgroup=subgroup)
-                    quality = qm.compute_qualitymeasure(avg_theta_G, avg_theta_0, idx_sg, idx_compl)
+                    quality = qm.compute_qualitymeasure(avg_theta_G, avg_theta_0, idx_sg, idx_compl, evaluation, epd)
                     # In the insert of priority queues is also a check if there is not a more redundant value, if so, change
                     if not(math.isnan(quality)):
                         beam.insert((descr, quality, idx_sg))

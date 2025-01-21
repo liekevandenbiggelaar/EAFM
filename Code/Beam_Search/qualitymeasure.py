@@ -2,11 +2,15 @@ import numpy as np
 import pandas as pd
 import math
 
-def compute_qualitymeasure(theta_1: float, theta_2: float, idx_sg: list, idx_compl: list):
-    ef = entropy(idx_sg, idx_compl)
-    return round(ef * ( theta_1 - theta_2 ), 2 ) 
+def compute_qualitymeasure(theta_1: float, theta_2: float, idx_sg: list, idx_compl: list, evaluation, epd):
 
-def entropy(idx_sg: list, idx_compl: list):
+    ef = entropy_function(idx_sg, idx_compl)
+    pr = precision_function(idx_sg, evaluation, epd)
+
+    
+    return round(ef * ( theta_1 - theta_2 ) * pr, 2 )
+
+def entropy_function(idx_sg: list, idx_compl: list):
     n = len(idx_sg)
     nC = len(idx_compl)
     N = n + nC
@@ -31,6 +35,17 @@ def compute_theta(target_data=None, theta='RMSSD', subgroup=None):
         val = np.mean(np.array(selection[theta]))
 
     return val
+
+def precision_function(idx_sg: list, evaluation, epd):
+
+    pids = list(epd.iloc[idx_sg]['PID'])
+    compls = evaluation[evaluation['PID'].isin(pids)]
+    p = len(compls)
+    n = len(idx_sg) - p
+    
+    pr = p / (p + n)
+    
+    return pr
     
 ##### HEART RATE VARIABILITY #####
 def RMSSD(deltaRR: list):
