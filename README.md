@@ -14,20 +14,6 @@ Training set 2 includes 706 records from 37 AF patients and 14 non-AF patients.
 In total this comes to 1436 records from 49 AF patients and 56 non-AF patients (total of 105 patients).
 
 ## Run experiments
-To run the experiments, run python main.py in the terminal. You can set your own parameters. The standard settings are based on the simulation from the paper:
-    main(
-        save_location = 'Data/',
-        data_name = 'CPSC2021',
-        beam_params = {'cp': 0.05, 'w': 50, 'd': 3, 'b': 3, 'q': 2},
-        model_params = {'freq': 200, 'phenotype': 'SDSD_P', 'cutoff': 0.75, 'sigma': 20, 'M': 10},
-        date = '20250122',
-        descriptor_location = None, #csv file
-        target_location = None,
-        evaluator_location = None,
-        tasks = {'generate_EHR': True, 'compute_qualitymeasures': True}
-    )
-
-
-All data is available in the code, but it is possible to generate your own set using the commands in the Jupyter Notebook.
+To run the experiments, run python main.py in the terminal. You can set your own parameters. The standard settings are based on the simulation from the paper.
 
 If you are working with your own electronic health records or another descriptor dataset, the attribute types must be changed. This is done in Code/Beam_Search/preprocess.py.
