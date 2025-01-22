@@ -1,6 +1,25 @@
 import numpy as np
 import pandas as pd
 
+def resultset_table(result_tuple=None, model_params=None):
+
+    resultsDct = {'Theta': [], 'Rank': [], 'Description': [], 'QM': [], 'Indexes': []}
+
+    resultsDct['Rank'] += [i for i in range(1, model_params['q']+1)]
+    resultsDct['Theta'] += [model_params['phenotype'] for i in range(1, model_params['q']+1)]
+
+    for res in result_tuple:
+        result_tuple['Description'].append([res[0]])
+        result_tuple['QM'].append(float(res[1]))
+        result_tuple['Indexes'].append([int(i) for i in res[2]])
+
+        result_tuple = []
+        
+    df_results = pd.DataFrame.from_dict(resultsDct)
+    
+    return df_results
+
+
 def other_relations(result: int, results_dataset, patients_dataset, quality_dataset, af_dataset):
     """ 
     Code to check the relevance of all characteristics. 

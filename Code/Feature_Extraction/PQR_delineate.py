@@ -1,9 +1,7 @@
 import heartpy as hp
 import neurokit2 as nk
-import matplotlib.pyplot as plt
 import numpy as np
 import scipy
-import ast
 
 from Code.Preprocessing.cleaning import weighted_moving_average, ecg_invert
 
@@ -258,22 +256,20 @@ def SQ_interval_difference(SQ):
 
 ##################### DELINEATE ALL ############################
                                   
-def extract_features(ecg: list, pid: str, wid: str, avg_PQ, avg_count, rate=500):
+def extract_features(ecg: list, pid: str, wid: str, avg_PQ, avg_count, model_params=None):
     
     features = {}
     
     features['PID'] = [pid]
     features['WID'] = [wid]
     
-    #plt.scatter(R, ecg[R], color='orange')
     ecg, inverted = ecg_invert(ecg)
-    ecg = hp.filter_signal(ecg, cutoff = 0.75, sample_rate = rate, filtertype='highpass')
-    ecg = weighted_moving_average(ecg, sigma=20, M=10)
-    
+    ecg = hp.filter_signal(ecg, cutoff = model_params['cutoff'], sample_rate = model_params['freq'], filtertype='highpass')
+    ecg = weighted_moving_average(ecg, sigma=model_params['sigma'], M=model_params['M'])
     
     # R-peak 
     try:
-        R = R_peak_detection(ecg, rate)
+        R = R_peak_detection(ecg, model_params['freq'])
         
     except:
         return features, avg_PQ, avg_count
@@ -281,7 +277,7 @@ def extract_features(ecg: list, pid: str, wid: str, avg_PQ, avg_count, rate=500)
     if len(R) <= 1:
         return features, avg_PQ, avg_count
     
-    RR, R = R_peak_interval(list(R), rate) 
+    RR, R = R_peak_interval(list(R), model_params['freq']) 
     deltaRR = RR_interval_difference(RR)
     # avg = create_avg_plot(ecg, R)
     
@@ -292,7 +288,7 @@ def extract_features(ecg: list, pid: str, wid: str, avg_PQ, avg_count, rate=500)
 
     # QRS-complex
     try:
-        waves = QRS_delineate(ecg, R, rate)
+        waves = QRS_delineate(ecg, R, model_params['freq'])
         Q, S = Q_S_peak_detection(waves)
         
     except:
@@ -316,14 +312,6 @@ def extract_features(ecg: list, pid: str, wid: str, avg_PQ, avg_count, rate=500)
         delta_SQ = SQ_interval_difference(SQ)
     else:
         QRS, wave_indices, waves_count = [], [], []
-    
-    # plt.figure(figsize=(15,10))
-    # plt.plot(range(len(ecg)), ecg)
-    # plt.scatter(R, ecg[R], color='orange')
-    # plt.scatter(Q, ecg[Q], color='red')
-    # plt.scatter(S, ecg[S], color='green')
-    # plt.scatter(wave_indices, ecg[wave_indices], color='grey')
-    # plt.show()
     
     features['QRS-duration'] = [QRS]
     features['SQ-duration'] = [SQ]

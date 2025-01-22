@@ -16,3 +16,5 @@ In total this comes to 1436 records from 49 AF patients and 56 non-AF patients (
 ## Run experiments:
 To run the experiments, simply run the 'execute.ipynb' file.
 All data is available in the code, but it is possible to generate your own set using the commands in the Jupyter Notebook.
+
+If you are working with your own electronic health records or another descriptor dataset, the attribute types must be changed. This is done in Code/Beam_Search/preprocess.py.

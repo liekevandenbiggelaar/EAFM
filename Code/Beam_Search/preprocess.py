@@ -1,6 +1,3 @@
-# Define the attributes and descriptions
-# 12-06-2024: Getest op mockset, werkt!
-
 
 def define_attributes(skip_attributes=None, outcome_attribute=None):
     
@@ -37,9 +34,9 @@ def define_attributes(skip_attributes=None, outcome_attribute=None):
     
     return attributes, descriptives
 
-def define_dtypes(dataset=None, descriptives=None):
+def define_dtypes(descriptors=None, descriptives=None):
     
     for col in descriptives['ord_atts']:
-        dataset[col] = dataset[col].astype('category')
+        descriptors[col] = descriptors[col].astype('category')
     
-    return dataset
+    return descriptors

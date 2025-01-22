@@ -6,17 +6,17 @@ accepted for publication at SIAM International Conference on Data Mining 2022 (S
 
 import numpy as np
 
-def create_starting_descriptions(dataset=None, descriptives=None, b=None):
+def create_starting_descriptions(descriptors=None, descriptives=None, b=None):
 
-    cq_bin = refine_binary_attributes(seed=None, dataset=dataset, subgroup=None, binary_attributes=descriptives['bin_atts'])    
+    cq_bin = refine_binary_attributes(seed=None, dataset=descriptors, subgroup=None, binary_attributes=descriptives['bin_atts'])    
 
-    cq_bin_nom = refine_nominal_attributes(cq=cq_bin, seed=None, dataset=dataset, subgroup=None, 
+    cq_bin_nom = refine_nominal_attributes(cq=cq_bin, seed=None, dataset=descriptors, subgroup=None, 
                                             nominal_attributes=descriptives['nom_atts'])
     
-    cq_bin_nom_num = refine_numerical_attributes(cq=cq_bin_nom, seed=None, dataset=dataset, subgroup=None, 
+    cq_bin_nom_num = refine_numerical_attributes(cq=cq_bin_nom, seed=None, dataset=descriptors, subgroup=None, 
                                                  numerical_attributes=descriptives['num_atts'], b=b)
 
-    cq_bin_nom_num_ord = refine_ordinal_attributes(cq=cq_bin_nom_num, seed=None, dataset=dataset, subgroup=None, 
+    cq_bin_nom_num_ord = refine_ordinal_attributes(cq=cq_bin_nom_num, seed=None, dataset=descriptors, subgroup=None, 
                                                    ordinal_attributes=descriptives['ord_atts'])
 
     return cq_bin_nom_num_ord

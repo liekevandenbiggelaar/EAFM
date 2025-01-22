@@ -1,16 +1,12 @@
 # This file contains all functions needed to open, load, and save the ECG from any of the included public datasets.
 import wfdb
 import os
-import re
 
-
-def load_record(dataset: str, record: str):
+def load_record(data_name: str, record: str):
 
     # Get the right directory
-    if dataset == 'CPSC':
+    if data_name == 'CPSC2021':
         filepath = 'Data/CPSC2021'
-    elif dataset == 'MITBIH' or dataset == 'MIT-BIH':
-        filepath = 'Data/MIT-BIH'
     else:
         return "Fault: Unknown dataset."
     

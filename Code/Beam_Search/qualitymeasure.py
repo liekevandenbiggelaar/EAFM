@@ -1,12 +1,10 @@
 import numpy as np
-import pandas as pd
 import math
 
-def compute_qualitymeasure(theta_1: float, theta_2: float, idx_sg: list, idx_compl: list, evaluation, epd):
+def compute_qualitymeasure(theta_1: float, theta_2: float, idx_sg: list, idx_compl: list, evaluators, descriptors):
 
     ef = entropy_function(idx_sg, idx_compl)
-    pr = precision_function(idx_sg, evaluation, epd)
-
+    pr = precision_function(idx_sg, evaluators, descriptors)
     
     return round(ef * ( theta_1 - theta_2 ) * pr, 2 )
 
@@ -25,21 +23,21 @@ def entropy_function(idx_sg: list, idx_compl: list):
     
     return ef
 
-def compute_theta(target_data=None, theta='RMSSD', subgroup=None):
+def compute_theta(targets=None, phenotype=None, subgroup=None):
     
     if len(subgroup) == 26:
-        val = np.mean(np.array(target_data[theta]))
+        val = np.mean(np.array(targets[phenotype]))
     else:
         pids = list(subgroup['PID'])
-        selection = target_data[target_data['PID'].isin(pids)]
-        val = np.mean(np.array(selection[theta]))
+        selection = targets[targets['PID'].isin(pids)]
+        val = np.mean(np.array(selection[phenotype]))
 
     return val
 
-def precision_function(idx_sg: list, evaluation, epd):
+def precision_function(idx_sg: list, evaluators, descriptors):
 
-    pids = list(epd.iloc[idx_sg]['PID'])
-    compls = evaluation[evaluation['PID'].isin(pids)]
+    pids = list(descriptors.iloc[idx_sg]['PID'])
+    compls = evaluators[evaluators['PID'].isin(pids)]
     p = len(compls)
     n = len(idx_sg) - p
     

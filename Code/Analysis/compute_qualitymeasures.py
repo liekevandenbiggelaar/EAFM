@@ -3,9 +3,9 @@ import ast
 
 import Code.Beam_Search.qualitymeasure as qm
 
-def compute_qualitymeasures(path: str, savepath: str):
+def compute_qualitymeasures(features: str):
     
-    metadata = pd.read_csv(path)
+    metadata = pd.read_csv(features)
     
     sdsd_all, rmssd_all, sdrr_all = [], [], []
     pcount_all, fcount_all, wavescount_all = [], [], []
@@ -71,9 +71,6 @@ def compute_qualitymeasures(path: str, savepath: str):
     quality_table['SDRR_F'] = sdrr_fall
     
     quality_table = quality_table.groupby(['PID'], as_index=False).mean().round(2)
-    
-    save_path = savepath
-    quality_table.to_csv(save_path + "QualityMeasures.csv", index=False)
     
     return quality_table
 

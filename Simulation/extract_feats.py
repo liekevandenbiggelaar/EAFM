@@ -1,26 +1,16 @@
-# Code for the extraction of features
 import Simulation.loaddata as ld
 import Code.Feature_Extraction.PQR_delineate as fe
-#import Code.Feature_Extraction.store_features as sf
-#import Code.Preprocessing as pr
-#import Code.Analysis as an
-#import Code.Beam_Search as bs
 
-import pandas as pd
 import os
 import re
 from natsort import natsorted
 
-def generate_features(dataset='CPSC'):
+def generate_features(data_name=None, model_params=None):
     """ Extract the features from the ECGs and put them into a new database. """
 
     # Get the right directory
-    if dataset == 'CPSC':
+    if data_name == 'CPSC2021':
         filepath = 'Data/CPSC2021'
-        rate = 200
-    elif dataset == 'MITBIH' or dataset == 'MIT-BIH':
-        filepath = 'Data/MIT-BIH'
-        rate = 250
     else:
         return "Fault: Unknown dataset."
 
@@ -42,7 +32,7 @@ def generate_features(dataset='CPSC'):
             continue
         
         print(f"Start on pid={pid} and wid={wid}")
-        leadII, af_bin = ld.load_record(dataset, record)
+        leadII, af_bin = ld.load_record(data_name, record)
 
         if pid in pids:
             avg_PQ = avg_PQ
@@ -52,7 +42,7 @@ def generate_features(dataset='CPSC'):
             avg_count = None 
 
         pids.append(pid)
-        extra_features, avg_PQ, avg_count = fe.extract_features(leadII, pid, wid, avg_PQ = avg_PQ, avg_count = avg_count, rate=rate)
+        extra_features, avg_PQ, avg_count = fe.extract_features(leadII, pid, wid, avg_PQ = avg_PQ, avg_count = avg_count, model_params=model_params)
         extra_features['AF'] = af_bin  
 
         feats = { key: feats.get(key, []) + extra_features.get(key, []) for key in set(list(feats.keys()) + list(extra_features.keys())) }

@@ -8,7 +8,7 @@ import Code.Beam_Search.qualitymeasure as qm
 from Code.Beam_Search.priority_queue import PriorityQueue
 
 
-def beam_search(epd, target, evaluation, theta: str, q: int, w: int, d: int, b: int, c: int):
+def beam_search(descriptors, targets, evaluators, phenotype: str, q: int, w: int, d: int, b: int, cp: int):
     """
     Input
     =====
@@ -27,16 +27,18 @@ def beam_search(epd, target, evaluation, theta: str, q: int, w: int, d: int, b: 
     ======
     result_set: PriorityQueue of length (q) with the best q descriptions
     """
+
+    c = round(cp * len(descriptors), 0)
     
     # Get all the descriptive attributes and change to the right type
     attributes, descriptives = pp.define_attributes()
-    epd = pp.define_dtypes(dataset=epd, descriptives=descriptives)
+    descriptors = pp.define_dtypes(descriptors=descriptors, descriptives=descriptives)
     
     # Create the candidate queue from all the features. This queue has unbouded length.
-    candidate_queue = rf.create_starting_descriptions(dataset=epd, descriptives=descriptives, b=b)
+    candidate_queue = rf.create_starting_descriptions(descriptors=descriptors, descriptives=descriptives, b=b)
     
     # Get the measurement average of the entire population.
-    avg_theta_0 = qm.compute_theta(target_data=target, theta=theta, subgroup=epd)
+    avg_theta_0 = qm.compute_theta(targets=targets, phenotype=phenotype, subgroup=descriptors)
     
     # Initialize the result set
     result_set = PriorityQueue(q, queue=[])
@@ -56,35 +58,30 @@ def beam_search(epd, target, evaluation, theta: str, q: int, w: int, d: int, b: 
                 seed_set.append(seed)
             else:                
                 # Refine the candidate queue descriptions
-                subgroup, idx_sg, subgroup_compl, idx_compl = ss.select_subgroup(description=seed['description'], df=epd, descriptives=descriptives)
+                subgroup, idx_sg, subgroup_compl, idx_compl = ss.select_subgroup(description=seed['description'], descriptors=descriptors, descriptives=descriptives)
                 seed_set = rf.refine_seed(seed=seed, subgroup=subgroup, descriptives=descriptives, b=b)
-                #print(seed_set)
             
             # Loop over all descriptions in the refined set
             for descr in seed_set:
                 
-                subgroup, idx_sg, subgroup_compl, idx_compl = ss.select_subgroup(description=descr['description'], df=epd, descriptives=descriptives)
+                subgroup, idx_sg, subgroup_compl, idx_compl = ss.select_subgroup(description=descr['description'], descriptors=descriptors, descriptives=descriptives)
                 
                 # It must be according to the conditions:
                 # 1. The subgroup must be larger than c
                 # 2. It must not be a similar description to what already exists
                 # 3. The description must not be redundant
                 if cs.satisfy_conditions(idx_sg, c, descr, cq_satisfied):
-                    #print(descr, cq_satisfied)
                     
-                    avg_theta_G = qm.compute_theta(target_data=target, theta=theta, subgroup=subgroup)
-                    quality = qm.compute_qualitymeasure(avg_theta_G, avg_theta_0, idx_sg, idx_compl, evaluation, epd)
-                    # In the insert of priority queues is also a check if there is not a more redundant value, if so, change
+                    avg_theta_G = qm.compute_theta(targets=targets, phenotype=phenotype, subgroup=subgroup)
+                    quality = qm.compute_qualitymeasure(avg_theta_G, avg_theta_0, idx_sg, idx_compl, evaluators, descriptors)
+
                     if not(math.isnan(quality)):
                         beam.insert((descr, quality, idx_sg))
-                        #print(beam)
+
                         result_set.insert((descr, quality, idx_sg))
                         cq_satisfied.append(descr)
-                    #print(result_set)
-                #else:
-                    #print('meh', idx_sg, descr)
-        
+
         candidate_queue = beam.get_descriptions()
-        #print(candidate_queue)
+
     
     return result_set.get_queue()

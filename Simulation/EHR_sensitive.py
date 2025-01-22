@@ -3,7 +3,7 @@
 import random
 import pandas as pd
 
-def generate_EHR(dataset = 'CPSC', vals = 105, other=False):
+def generate_EHR(data_name=None, vals=None, other=False):
     """
     Generating fictional Electronic Health Records for patients. The values are created biased towards the real world as informed by domain experts.
     This includes binary, numerical, and nominal features: 
@@ -14,11 +14,11 @@ def generate_EHR(dataset = 'CPSC', vals = 105, other=False):
 
     """
     random.seed(2)
-    dct_samplesizes = {'MITBIH': 25, 'CPSC': 105, 'SHDB-AF': 100}
+    dct_samplesizes = {'MITBIH': 25, 'CPSC2021': 105, 'SHDB-AF': 100}
     if other:
         size = vals
     else:
-        size = dct_samplesizes[dataset]
+        size = dct_samplesizes[data_name]
 
     dct_EHR = {}
 
