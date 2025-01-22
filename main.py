@@ -85,16 +85,3 @@ if __name__ == '__main__':
         tasks = {'generate_EHR': True, 'compute_qualitymeasures': True}
     )
 
-    """
-    main(
-        save_location = 'Data/',
-        data_name = 'CPSC2021',
-        beam_params = {'cp': 0.05, 'w': 50, 'd': 3, 'b': 3, 'q': 2},
-        model_params = {'freq': 200, 'phenotype': 'SDSD_P'},
-        date = '20250122',
-        descriptor_location = None, #csv file
-        target_location = None,
-        evaluator_location = None,
-        tasks = {'generate_EHR': True, 'compute_qualitymeasures': True}
-    )
-    """
