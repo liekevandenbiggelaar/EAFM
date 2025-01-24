@@ -1,19 +1,24 @@
 import numpy as np
 import pandas as pd
 
-def resultset_table(result_tuple=None, model_params=None):
+def resultset_table(result_tuple=None, model_params=None, beam_params=None, evaluators=None):
 
-    resultsDct = {'Theta': [], 'Rank': [], 'Description': [], 'QM': [], 'Indexes': []}
+    
 
-    resultsDct['Rank'] += [i for i in range(1, model_params['q']+1)]
-    resultsDct['Theta'] += [model_params['phenotype'] for i in range(1, model_params['q']+1)]
+    resultsDct = {'Theta': [], 'Rank': [], 'Description': [], 'QM': [], 'AF Percentage': [], 'Indexes': []}
+
+    resultsDct['Rank'] += [i for i in range(1, beam_params['q']+1)]
+    resultsDct['Theta'] += [model_params['phenotype'] for i in range(0, beam_params['q'])]
 
     for res in result_tuple:
-        result_tuple['Description'].append([res[0]])
-        result_tuple['QM'].append(float(res[1]))
-        result_tuple['Indexes'].append([int(i) for i in res[2]])
+        resultsDct['Description'].append([res[0]])
+        resultsDct['QM'].append(float(res[1]))
+        resultsDct['Indexes'].append([int(i) for i in res[2]])
 
-        result_tuple = []
+        evals = evaluators[evaluators['PID'].isin(res[2])]
+
+        AFperc = np.array(evals['AF']).sum()/len(evals)
+        resultsDct['AF Percentage'].append(AFperc)
         
     df_results = pd.DataFrame.from_dict(resultsDct)
     

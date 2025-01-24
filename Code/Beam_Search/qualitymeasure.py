@@ -25,19 +25,21 @@ def entropy_function(idx_sg: list, idx_compl: list):
 
 def compute_theta(targets=None, phenotype=None, subgroup=None):
     
-    if len(subgroup) == 26:
+    if len(subgroup) == len(targets):
         val = np.mean(np.array(targets[phenotype]))
     else:
-        pids = list(subgroup['PID'])
-        selection = targets[targets['PID'].isin(pids)]
+        pids = list(subgroup)
+        selection = targets.loc[pids]
         val = np.mean(np.array(selection[phenotype]))
 
     return val
 
 def precision_function(idx_sg: list, evaluators, descriptors):
 
-    pids = list(descriptors.iloc[idx_sg]['PID'])
-    compls = evaluators[evaluators['PID'].isin(pids)]
+    pids = list(idx_sg)
+
+    set = evaluators.loc[pids]
+    compls = [1 for j in range(len(set)) if set.iloc[j]['AF'] == 1]
     p = len(compls)
     n = len(idx_sg) - p
     

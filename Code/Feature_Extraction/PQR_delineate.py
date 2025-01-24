@@ -262,7 +262,8 @@ def extract_features(ecg: list, pid: str, wid: str, avg_PQ, avg_count, model_par
     
     features['PID'] = [pid]
     features['WID'] = [wid]
-    
+
+
     ecg, inverted = ecg_invert(ecg)
     ecg = hp.filter_signal(ecg, cutoff = model_params['cutoff'], sample_rate = model_params['freq'], filtertype='highpass')
     ecg = weighted_moving_average(ecg, sigma=model_params['sigma'], M=model_params['M'])
@@ -281,9 +282,9 @@ def extract_features(ecg: list, pid: str, wid: str, avg_PQ, avg_count, model_par
     deltaRR = RR_interval_difference(RR)
     # avg = create_avg_plot(ecg, R)
     
-    features['R-location'] = [int(i) for i in R]
-    features['RR-interval'] = [int(j) for j in RR]
-    features['RR-difference'] = [int(m) for m in deltaRR]
+    features['R-location'] = [[int(i) for i in R]]
+    features['RR-interval'] = [[int(j) for j in RR]]
+    features['RR-difference'] = [[int(m) for m in deltaRR]]
     
 
     # QRS-complex
@@ -307,18 +308,17 @@ def extract_features(ecg: list, pid: str, wid: str, avg_PQ, avg_count, model_par
     if len(Q) != 0 and len(S) != 0:
         QRS = QRS_duration(Q.copy(), S.copy(), avg_RR)
         
-        waves_count, extra_waves, wave_indices, Q_peaks_correct, SQ, avg_PQ, avg_count = wave_detection(ecg, S.copy(), Q.copy(), wid, '1', avg_PQ, avg_count)
+        waves_count, _, wave_indices, Q_peaks_correct, SQ, avg_PQ, avg_count = wave_detection(ecg, S.copy(), Q.copy(), wid, '1', avg_PQ, avg_count)
         P_binary, F_binary = P_existence(wave_indices, Q_peaks_correct, avg_PQ)
         delta_SQ = SQ_interval_difference(SQ)
     else:
-        QRS, wave_indices, waves_count = [], [], []
+        SQ, QRS, delta_SQ, waves_count = [], [], [], []
     
     features['QRS-duration'] = [QRS]
     features['SQ-duration'] = [SQ]
-    features['SQ-difference'] = [int(c) for c in delta_SQ]
+    features['SQ-difference'] = [[int(c) for c in delta_SQ]]
     
     features['Wave Count'] = [waves_count]
-    features['Extra Waves'] = [extra_waves]
     features['P-existence'] = [P_binary]
     features['F-existence'] = [F_binary]
     

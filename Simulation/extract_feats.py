@@ -4,8 +4,9 @@ import Code.Feature_Extraction.PQR_delineate as fe
 import os
 import re
 from natsort import natsorted
+import datetime
 
-def generate_features(data_name=None, model_params=None):
+def generate_features(data_name=None, model_params=None, max_i=None):
     """ Extract the features from the ECGs and put them into a new database. """
 
     # Get the right directory
@@ -21,17 +22,25 @@ def generate_features(data_name=None, model_params=None):
     pids = []
     feats = {}
     i = 0
-    for record in sorted_set:
-        i += 1
+    pid_prev = 'placeholder'
 
+    for record in sorted_set:
+        if i == max_i:
+            return feats
+        i += 1
+        
         pid = re.search(r'data_(\d+)_', record).group(1)
         wid = re.search(r'_(\d+)$', record).group(1)
+        if pid != pid_prev:
+            print(f"Start on pid={pid} at ", str(datetime.datetime.now()))
+        
+        pid_prev = pid
 
-        kernelerror = ['8', '11', '25', '38', '40', '51', '57', '71']
+        kernelerror = ['8', '11', '25', '38', '40', '51', '57', '71', '50']
         if pid in kernelerror:
             continue
         
-        print(f"Start on pid={pid} and wid={wid}")
+        
         leadII, af_bin = ld.load_record(data_name, record)
 
         if pid in pids:
@@ -41,10 +50,15 @@ def generate_features(data_name=None, model_params=None):
             avg_PQ = None
             avg_count = None 
 
-        pids.append(pid)
-        extra_features, avg_PQ, avg_count = fe.extract_features(leadII, pid, wid, avg_PQ = avg_PQ, avg_count = avg_count, model_params=model_params)
-        extra_features['AF'] = af_bin  
+        try:
+            extra_features, avg_PQ, avg_count = fe.extract_features(leadII, pid, wid, avg_PQ = avg_PQ, avg_count = avg_count, model_params=model_params)
+            pids.append(pid)
+            extra_features['AF'] = af_bin  
 
-        feats = { key: feats.get(key, []) + extra_features.get(key, []) for key in set(list(feats.keys()) + list(extra_features.keys())) }
+            feats = { key: feats.get(key, []) + extra_features.get(key, []) for key in set(list(feats.keys()) + list(extra_features.keys())) }
+
+        except:
+            print('skipped')
+        
 
     return feats

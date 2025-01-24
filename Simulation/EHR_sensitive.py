@@ -3,7 +3,7 @@
 import random
 import pandas as pd
 
-def generate_EHR(data_name=None, vals=None, other=False):
+def generate_EHR(data=None):
     """
     Generating fictional Electronic Health Records for patients. The values are created biased towards the real world as informed by domain experts.
     This includes binary, numerical, and nominal features: 
@@ -14,15 +14,12 @@ def generate_EHR(data_name=None, vals=None, other=False):
 
     """
     random.seed(2)
-    dct_samplesizes = {'MITBIH': 25, 'CPSC2021': 105, 'SHDB-AF': 100}
-    if other:
-        size = vals
-    else:
-        size = dct_samplesizes[data_name]
+    size = len(data)
 
     dct_EHR = {}
 
     # age is skewed towards the age that most AF occurs (from 50)
+    dct_EHR['PID'] = data['PID']
     age = [random.randint(50, 80) for i in range(size)]
     dct_EHR['a1'] = age
 

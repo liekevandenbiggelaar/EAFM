@@ -71,8 +71,7 @@ def beam_search(descriptors, targets, evaluators, phenotype: str, q: int, w: int
                 # 2. It must not be a similar description to what already exists
                 # 3. The description must not be redundant
                 if cs.satisfy_conditions(idx_sg, c, descr, cq_satisfied):
-                    
-                    avg_theta_G = qm.compute_theta(targets=targets, phenotype=phenotype, subgroup=subgroup)
+                    avg_theta_G = qm.compute_theta(targets=targets, phenotype=phenotype, subgroup=idx_sg)
                     quality = qm.compute_qualitymeasure(avg_theta_G, avg_theta_0, idx_sg, idx_compl, evaluators, descriptors)
 
                     if not(math.isnan(quality)):

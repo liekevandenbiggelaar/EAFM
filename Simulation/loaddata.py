@@ -45,7 +45,7 @@ def aggregate_dataset(df):
         else:
             agg_functions[col] = 'sum'
     
-    df_agg = df_noWID.groupby('PID').agg(agg_functions)
+    df_agg = df_noWID.groupby('PID', as_index=False).agg(agg_functions)
 
     return df_agg
 

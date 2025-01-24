@@ -1,0 +1,2 @@
+Theta,Rank,Description,QM,AF Percentage,Indexes
+RMSSD_P,1,"[{'description': {'a43': ['Taken'], 'a12': (np.float64(84.00000000000007), np.float64(2463.0)), 'a34': ['Not Taken']}}]",12.26,0.8,"[10, 62, 65, 79, 104]"
